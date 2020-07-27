@@ -9,15 +9,17 @@ public class Runner {
 
         currentState.printBoard();
 
-        for(Action a: currentState.applicableActions())
-            System.out.println(a.getMove());
+        currentState.createApplicableActions();
 
+        System.out.println("size = " + currentState.getApplicableActions().size());
+
+        for(Action a: currentState.getApplicableActions())
+            System.out.println(a.getMove());
 
         while (!currentState.isTerminal()) {
             System.out.println("Current player = " + currentState.getPlayer());
             currentState.printBoard();
             if (currentState.getPlayer() == Player.AI) {
-
                 currentState = getNextState(currentState, depthCutOff);
 //                change player
                 currentState.setPlayer(currentState.getPlayer().otherPlayer());

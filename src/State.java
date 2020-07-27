@@ -30,6 +30,7 @@ public class State {
     private int[][] board;
     private int boardSize = 4;
     private int score = 0;
+    List<Action> applicableActions;
 
     public boolean isTerminal() {
         for(int i = 0; i < boardSize; i++)
@@ -43,7 +44,7 @@ public class State {
         this.player = Player.AI;
         this.level = 0;
         this.board = createInitialBoard();
-
+//        this.applicableActions = createApplicableActions();
 //        TODO: implement
 //        this.utility = ?
     }
@@ -56,6 +57,7 @@ public class State {
         resState.setLevel(this.level);
         resState.setBoardSize(this.boardSize);
         resState.setScore(this.score);
+        resState.setApplicableActions(this.getApplicableActions());
         return resState;
     }
 
@@ -97,7 +99,7 @@ public class State {
         return -1;
     }
 
-    public List<Action> applicableActions() {
+    public void createApplicableActions() {
         List<Action> applicableActions = new ArrayList<>();
         State stateClone = this.stateClone();
         if(Moves.moveUp(stateClone))
@@ -112,11 +114,13 @@ public class State {
         if(Moves.moveRight(stateClone))
             applicableActions.add(new Action(Move.RIGHT));
 
-        return applicableActions;
+        this.applicableActions = applicableActions;
     }
 //    returns the state we get into from the current state after applying action a
     public State result(Action a) {
         State resState = this.stateClone();
+        if(a == null)
+            System.out.println("NULL");
         System.out.println(a.toString());
         switch(a.getMove()) {
             case UP:
@@ -208,6 +212,15 @@ public class State {
     public void setScore(int score) {
         this.score = score;
     }
+
+    public List<Action> getApplicableActions() {
+        return applicableActions;
+    }
+
+    public void setApplicableActions(List<Action> applicableActions) {
+        this.applicableActions = applicableActions;
+    }
+
 
 }
 class Action {
