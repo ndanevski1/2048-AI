@@ -1,6 +1,6 @@
 public class Moves {
-    static int boardSize = 4;
     private static boolean move(State state, int start, int yIncrease, int xIncrease) {
+        int boardSize = state.getBoardSize();
         int[][] board = state.getBoard();
         int score = state.getScore();
         boolean moved = false;
@@ -56,7 +56,7 @@ public class Moves {
     }
 
     static boolean moveDown(State state) {
-        return move(state, boardSize * boardSize - 1, 1, 0);
+        return move(state, state.getBoardSize() * state.getBoardSize() - 1, 1, 0);
     }
 
     static boolean moveLeft(State state) {
@@ -64,7 +64,7 @@ public class Moves {
     }
 
     static boolean moveRight(State state) {
-        return move(state, boardSize * boardSize - 1, 0, 1);
+        return move(state, state.getBoardSize() * state.getBoardSize() - 1, 0, 1);
     }
 
 }

@@ -37,6 +37,10 @@ public class State {
             for(int j = 0; j < boardSize; j++)
                 if(board[i][j] == 0)
                     return false;
+        if(Moves.moveDown(this.stateClone()) || Moves.moveUp(this.stateClone()) ||
+                Moves.moveLeft(this.stateClone()) ||Moves.moveRight(this.stateClone())
+        )
+            return false;
         return true;
     }
 
@@ -44,11 +48,19 @@ public class State {
         this.player = Player.AI;
         this.level = 0;
         this.board = createInitialBoard();
+        this. applicableActions = new ArrayList<>();
 //        this.applicableActions = createApplicableActions();
 //        TODO: implement
 //        this.utility = ?
     }
 
+    public List<Action> deepCopyAppActions() {
+        List<Action> res = new ArrayList<>();
+        if(applicableActions != null)
+        for(Action a : applicableActions)
+            res.add(a.actionClone());
+        return res;
+    }
 
     public State stateClone() {
         State resState = new State();
@@ -57,7 +69,7 @@ public class State {
         resState.setLevel(this.level);
         resState.setBoardSize(this.boardSize);
         resState.setScore(this.score);
-        resState.setApplicableActions(this.getApplicableActions());
+        resState.setApplicableActions(this.deepCopyAppActions());
         return resState;
     }
 
@@ -118,10 +130,7 @@ public class State {
     }
 //    returns the state we get into from the current state after applying action a
     public State result(Action a) {
-        State resState = this.stateClone();
-        if(a == null)
-            System.out.println("NULL");
-        System.out.println(a.toString());
+        State resState = this;
         switch(a.getMove()) {
             case UP:
                 Moves.moveUp(resState);
@@ -141,9 +150,22 @@ public class State {
         return resState;
     }
 
+    public int numberOfEmptyCells() {
+        int res = 0;
+        for(int i = 0; i < boardSize; i++)
+            for(int j = 0; j < boardSize; j++)
+                if(this.board[i][j] == 0)
+                    res++;
+        return res;
+    }
+
     public int heuristicValue() {
 //        TODO: implement
-        return -3;
+
+        int clusteringScore = 0;
+        int emptyCells = this.numberOfEmptyCells();
+        int heuristicScore = this.score + (int) Math.log(this.score) * emptyCells + emptyCells;
+        return heuristicScore;
     }
 
     public void addTile() {
@@ -154,6 +176,7 @@ public class State {
                 if (board[i][j] == 0)
                     freeTiles.add(new Pair(i, j));
         if (freeTiles.size() == 0) {
+            System.exit(0);
 //            is terminal
             return;
         }
@@ -232,6 +255,11 @@ class Action {
         this.move = move;
 //        todo: change?
         this.value = Integer.MIN_VALUE;
+    }
+    public Action actionClone() {
+        Action a = new Action(this.move);
+        a.setValue(this.value);
+        return a;
     }
 
     public int getValue() {

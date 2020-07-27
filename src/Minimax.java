@@ -6,26 +6,30 @@ public class Minimax {
         int beta = Integer.MAX_VALUE;
         int v = maxValue(state, depthCutoff, alpha, beta);
 
-        System.out.println("v = " + v);
+//        System.out.println("v = " + v);
 
         Action returnAction = null;
         for(Action a: state.getApplicableActions()) {
-            System.out.println("a value = " + a.getValue());
+
+            System.out.println("a value = " + a.getValue() + " for move = " + a.getMove());
+            state.result(a).printBoard();
             if(a.getValue() == v)
                 returnAction = a;
 
         }
+        System.out.println("Best move is " + returnAction.getMove() + " with value " + returnAction.getValue());
         return returnAction;
     }
 
     private static int maxValue(State state, int depth, int alpha, int beta) {
-        if (state.isTerminal())
+        if (state.isTerminal()) {
+            System.out.println("IS TERMINAL");
             return state.utility();
+        }
         else if (depth == 0)
             return state.heuristicValue();
         int v = Integer.MIN_VALUE;
         for (Action a: state.getApplicableActions()) {
-            System.out.println("Going to depth = " + (depth-1));
             v = Math.max(v, minValue(state.result(a), depth - 1, alpha, beta));
             if (v >= beta) {
                 a.setValue(v);
@@ -33,7 +37,6 @@ public class Minimax {
             }
             alpha = Math.max(alpha, v);
             a.setValue(alpha);
-            System.out.println("Set value to " + a.getValue());
         }
         return v;
     }
