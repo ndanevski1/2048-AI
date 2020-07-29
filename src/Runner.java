@@ -6,36 +6,25 @@ public class Runner {
         currentState = new State();
     }
     public void run() {
-
-//        currentState.printBoard();
-
         currentState.createApplicableActions();
-
-//        for(Action a: currentState.getApplicableActions())
-//            System.out.println(a.getMove());
-
         while (!currentState.isTerminal()) {
-            System.out.println("\n\n\n\n");
-
+            System.out.println("Current score = " + currentState.getScore() + ". Current player = " + currentState.getPlayer());
+            currentState.printBoard();
+            System.out.println();
             if (currentState.getPlayer() == Player.AI) {
-                currentState.printBoard();
-                System.out.println("Current score = " + currentState.getScore());
-
                 currentState = getNextState(currentState, depthCutOff);
                 currentState.createApplicableActions();
-//                change player
-                currentState.setPlayer(currentState.getPlayer().otherPlayer());
             }
-            else {
+            else
                 currentState.addTile();
-                currentState.setPlayer(currentState.getPlayer().otherPlayer());
-
-//                currentState.printBoard();
-            }
+            currentState.setPlayer(currentState.getPlayer().otherPlayer());
         }
+        System.out.println("Final position of the board:");
         currentState.printBoard();
+        System.out.println("Final score = " + currentState.getScore());
     }
     private State getNextState(State currentState, int depthCutOff) {
-        return currentState.result(Minimax.AlphaBetaSearch(currentState, depthCutOff));
+        Action nextAction = Minimax.abPruning(currentState, depthCutOff);
+        return currentState.result(nextAction);
     }
 }

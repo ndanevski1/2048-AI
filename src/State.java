@@ -24,9 +24,7 @@ enum Player {
 }
 
 public class State {
-    private int utility;
     private Player player;
-    private int level;
     private int[][] board;
     private int boardSize = 4;
     private int score = 0;
@@ -37,28 +35,21 @@ public class State {
             for(int j = 0; j < boardSize; j++)
                 if(board[i][j] == 0)
                     return false;
-        if(Moves.moveDown(this.stateClone()) || Moves.moveUp(this.stateClone()) ||
-                Moves.moveLeft(this.stateClone()) ||Moves.moveRight(this.stateClone())
-        )
-            return false;
-        return true;
+        return !Moves.moveDown(this.stateClone()) && !Moves.moveUp(this.stateClone()) &&
+                !Moves.moveLeft(this.stateClone()) && !Moves.moveRight(this.stateClone());
     }
 
     public State() {
         this.player = Player.AI;
-        this.level = 0;
         this.board = createInitialBoard();
         this. applicableActions = new ArrayList<>();
-//        this.applicableActions = createApplicableActions();
-//        TODO: implement
-//        this.utility = ?
     }
 
     public List<Action> deepCopyAppActions() {
         List<Action> res = new ArrayList<>();
         if(applicableActions != null)
-        for(Action a : applicableActions)
-            res.add(a.actionClone());
+            for(Action a : applicableActions)
+                res.add(a.actionClone());
         return res;
     }
 
@@ -66,15 +57,14 @@ public class State {
         State resState = new State();
         resState.setBoard(this.boardClone());
         resState.setPlayer(this.player);
-        resState.setLevel(this.level);
         resState.setBoardSize(this.boardSize);
         resState.setScore(this.score);
         resState.setApplicableActions(this.deepCopyAppActions());
         return resState;
     }
 
-    private static int[][] createInitialBoard() {
-        int[][] board = new int[4][4];
+    private int[][] createInitialBoard() {
+        int[][] board = new int[this.boardSize][this.boardSize];
 //        we generate two starting numbers; 2 with probability 0.8 and 4 with probability 0.2
         int[] possibleNumbers = {2, 2, 2, 2, 4};
         Random rand = new Random();
@@ -107,9 +97,6 @@ public class State {
         }
     }
 
-    public int utility() {
-        return -1;
-    }
 
     public void createApplicableActions() {
         List<Action> applicableActions = new ArrayList<>();
@@ -131,22 +118,23 @@ public class State {
 //    returns the state we get into from the current state after applying action a
     public State result(Action a) {
         State resState = this;
-        switch(a.getMove()) {
-            case UP:
-                Moves.moveUp(resState);
-                break;
-            case DOWN:
-                Moves.moveDown(resState);
-                break;
-            case LEFT:
-                Moves.moveLeft(resState);
-                break;
-            case RIGHT:
-                Moves.moveRight(resState);
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + a.getMove());
-        }
+        if(a != null)
+            switch(a.getMove()) {
+                case UP:
+                    Moves.moveUp(resState);
+                    break;
+                case DOWN:
+                    Moves.moveDown(resState);
+                    break;
+                case LEFT:
+                    Moves.moveLeft(resState);
+                    break;
+                case RIGHT:
+                    Moves.moveRight(resState);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + a.getMove());
+            }
         return resState;
     }
 
@@ -159,12 +147,39 @@ public class State {
         return res;
     }
 
+    public int calculateClusteringScore() {
+        int clusteringScore = 0;
+        int[] dx = {-1, -1, -1, 0, 0, 1, 1, 1};
+        int[] dy = {-1, 0, 1, -1, 1, -1, 0, 1};
+
+        for(int i = 0; i < boardSize; i++) {
+            for(int j = 0; j < boardSize; j++) {
+                if(board[i][j] == 0)
+                    continue;
+                int sumForCell = 0;
+                int numOfNeighbors = 0;
+                for(int k = 0; k < 8; k++) {
+                    int newI = i + dx[k];
+                    int newJ = j + dy[k];
+                    if(newI >= 0 && newI < boardSize && newJ >= 0 && newJ < boardSize)
+                        if(board[newI][newJ] != 0) {
+                            sumForCell += Math.abs(board[newI][newJ] - board[i][j]);
+                            numOfNeighbors++;
+                        }
+                }
+                if(numOfNeighbors != 0)
+                    clusteringScore += sumForCell/numOfNeighbors;
+            }
+        }
+        return clusteringScore;
+    }
+
     public int heuristicValue() {
 //        TODO: implement
 
-        int clusteringScore = 0;
+        int clusteringScore = calculateClusteringScore();
         int emptyCells = this.numberOfEmptyCells();
-        int heuristicScore = this.score + (int) Math.log(this.score) * emptyCells + emptyCells;
+        int heuristicScore = this.score + (int) Math.log(this.score) * emptyCells - clusteringScore;
         return heuristicScore;
     }
 
@@ -188,28 +203,12 @@ public class State {
                 = possibleNumbers[randomPossibleNumber];
     }
 
-    public int getUtility() {
-        return utility;
-    }
-
-    public void setUtility(int utility) {
-        this.utility = utility;
-    }
-
     public Player getPlayer() {
         return player;
     }
 
     public void setPlayer(Player player) {
         this.player = player;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
     }
 
     public int getBoardSize() {
@@ -244,30 +243,18 @@ public class State {
         this.applicableActions = applicableActions;
     }
 
-
 }
 class Action {
-    private int value;
     private Move move;
-
 
     public Action(Move move) {
         this.move = move;
-//        todo: change?
-        this.value = Integer.MIN_VALUE;
-    }
-    public Action actionClone() {
-        Action a = new Action(this.move);
-        a.setValue(this.value);
-        return a;
     }
 
-    public int getValue() {
-        return value;
+    public Action actionClone() {
+        return new Action(this.move);
     }
-    public void setValue(int value) {
-        this.value = value;
-    }
+
     public Move getMove() {
         return move;
     }
@@ -278,7 +265,6 @@ class Action {
     @Override
     public String toString() {
         return "Action{" +
-                "value=" + value +
                 ", move=" + move +
                 '}';
     }

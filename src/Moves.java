@@ -11,7 +11,7 @@ public class Moves {
             int row = j / boardSize;
             int col = j % boardSize;
 
-            if (board[row][col] == 0)
+            if (board[row ][col] == 0)
                 continue;
 
             int nextRow = row + yIncrease;
