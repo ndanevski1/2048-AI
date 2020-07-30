@@ -147,40 +147,8 @@ public class State {
         return res;
     }
 
-    public int calculateClusteringScore() {
-        int clusteringScore = 0;
-        int[] dx = {-1, -1, -1, 0, 0, 1, 1, 1};
-        int[] dy = {-1, 0, 1, -1, 1, -1, 0, 1};
-
-        for(int i = 0; i < boardSize; i++) {
-            for(int j = 0; j < boardSize; j++) {
-                if(board[i][j] == 0)
-                    continue;
-                int sumForCell = 0;
-                int numOfNeighbors = 0;
-                for(int k = 0; k < 8; k++) {
-                    int newI = i + dx[k];
-                    int newJ = j + dy[k];
-                    if(newI >= 0 && newI < boardSize && newJ >= 0 && newJ < boardSize)
-                        if(board[newI][newJ] != 0) {
-                            sumForCell += Math.abs(board[newI][newJ] - board[i][j]);
-                            numOfNeighbors++;
-                        }
-                }
-                if(numOfNeighbors != 0)
-                    clusteringScore += sumForCell/numOfNeighbors;
-            }
-        }
-        return clusteringScore;
-    }
-
     public int heuristicValue() {
-//        TODO: implement
-
-        int clusteringScore = calculateClusteringScore();
-        int emptyCells = this.numberOfEmptyCells();
-        int heuristicScore = this.score + (int) Math.log(this.score) * emptyCells - clusteringScore;
-        return heuristicScore;
+        return Heuristics.heuristicValue(this);
     }
 
     public void addTile() {

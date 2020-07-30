@@ -4,14 +4,17 @@ public class Minimax {
         int res = Integer.MIN_VALUE;
         Action resAction = null;
         state.createApplicableActions();
+        System.out.print("Comparing between: ");
         for(Action a: state.getApplicableActions()) {
             State stateClone = state.stateClone();
-            int val = maxValue(stateClone, a, Integer.MIN_VALUE, Integer.MAX_VALUE, depth);
+            int val = minValue(stateClone, a, Integer.MIN_VALUE, Integer.MAX_VALUE, depth);
+            System.out.print(val + " and ");
             if(val > res) {
                 res = val;
                 resAction = a;
             }
         }
+        System.out.println();
         return resAction;
     }
 

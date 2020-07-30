@@ -14,11 +14,8 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         int depthCutOff = depthCutoff(scanner);
-//        System.out.println(depthCutOff);
-
         Runner start = new Runner(depthCutOff);
         start.run();
-
         scanner.close();
         System.out.println("End of Program!");
     }
